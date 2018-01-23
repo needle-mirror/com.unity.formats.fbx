@@ -1,12 +1,14 @@
 {
   "name": "com.unity.formats.fbx",
   "displayName": "FBX Exporter",
-  "version": "2.0.1-preview.2",
+  "version": "2.0.1-preview.3",
   "dependencies": {
-    "com.autodesk.fbx": "2.0.0-preview.4"
+    "com.unity.timeline": "0.0.0-builtin",
+    "com.autodesk.fbx": "2.0.0-preview.5"
   },
-  "unity": "2018.2",
-  "description": "The Unity FBX Exporter package makes it easy to send geometry and animation from Unity 2018.2 or later to any application that supports FBX and back again with minimal effort.\n\nIn particular, this round-trip workflow enables you to export Unity scenes to FBX, import into Maya, Maya LT, or 3ds Max using an artist-friendly interface, export Unity-ready FBX geometry and animation, and safely merge your changes back into those Assets to continue your work.\n\nThe exporter provides support for GameObject hierarchies, Materials, Textures, Cameras, Lights, Skinned Meshes, and Animation. The Unity FBX importer provides support for hierarchies, Materials, Textures, Stingray Physically Based Shader (PBS), Cameras, Animation and Animated custom properties (when present in the FBX file).\n\nThis package includes a plug-in for Autodesk Maya 2017 or later, Autodesk Maya LT 2017 or later, and 3ds Max 2017 or later.",
+  "unity": "2018.3",
+  "unityRelease": "2018.3.4f1",
+  "description": "The Unity FBX Exporter package makes it easy to send geometry and animation from Unity 2018.3 or later to any application that supports FBX and back again with minimal effort.\n\nIn particular, this round-trip workflow enables you to export Unity scenes to FBX, import into Maya, Maya LT, or 3ds Max using an artist-friendly interface, export Unity-ready FBX geometry and animation, and safely merge your changes back into those Assets to continue your work.\n\nThe exporter provides support for GameObject hierarchies, Materials, Textures, Cameras, Lights, Skinned Meshes, and Animation. The Unity FBX importer provides support for hierarchies, Materials, Textures, Stingray Physically Based Shader (PBS), Cameras, Animation and Animated custom properties (when present in the FBX file).\n\nThis package includes a plug-in for Autodesk Maya 2017 or later, Autodesk Maya LT 2017 or later, and 3ds Max 2017 or later.",
   "keywords": [
     "fbx",
     "animation",
@@ -17,6 +19,9 @@
   "repository": {
     "url": "git@github.com:Unity-Technologies/FbxExporters.git",
     "type": "git",
-    "revision": "9eb24e411d68ac7fd4c324a4f5b165101477b437"
+    "revision": "7acac95436d558c54bfa75611eb552bf9dcc3866"
+  },
+  "relatedPackages": {
+    "com.unity.formats.fbx.tests": "2.0.0-preview" 
   }
 }

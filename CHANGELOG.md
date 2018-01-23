@@ -1,5 +1,11 @@
 # Changes in Fbx Exporter
 
+## [2.0.1-preview.3] - 2018-01-24
+CHANGES
+* Moved tests to separate .tests package
+* Added Timeline dependency
+* Export of blendshapes is experimental, YMMV
+
 ## [2.0.1-preview.2] - 2018-12-05
 CHANGES
 * Updated dependency to com.autodesk.fbx@2.0.0-preview.4
