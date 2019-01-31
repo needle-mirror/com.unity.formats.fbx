@@ -1,10 +1,15 @@
 # Changes in Fbx Exporter
 
-## [2.0.1-preview.4] - 2018-01-31
+## [2.0.1-preview.5] - 2019-02-01
+CHANGES
+* Updated to com.autodesk.fbx 2.0.0-preview.6
+* Updated asmdefs to only include Editor platform
+
+## [2.0.1-preview.4] - 2019-01-31
 CHANGES
 * Updated unityRelease version in package.json
 
-## [2.0.1-preview.3] - 2018-01-24
+## [2.0.1-preview.3] - 2019-01-24
 CHANGES
 * Moved tests to separate .tests package
 * Added Timeline dependency
