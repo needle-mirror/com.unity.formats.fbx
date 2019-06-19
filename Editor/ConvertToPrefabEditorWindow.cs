@@ -1,4 +1,3 @@
-#if !UNITY_2018_3_OR_NEWER
 using System.Collections.Generic;
 using UnityEngine;
 #if UNITY_2018_1_OR_NEWER
@@ -47,11 +46,13 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
             TransferAnimationSource = null;
             TransferAnimationDest = null;
+
+            string fbxFileName = null;
             if (GetToExport().Length == 1)
             {
                 var go = ModelExporter.GetGameObject(GetToExport()[0]);
                 // check if the GameObject is a model instance, use as default filename and path if it is
-                var mainAsset = ConvertToModel.GetFbxAssetOrNull(go);
+                GameObject mainAsset = ConvertToNestedPrefab.GetFbxAssetOrNull(go);
                 if (!mainAsset)
                 {
                     // Use the game object's name
@@ -66,6 +67,14 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
                     m_prefabFileName = System.IO.Path.GetFileNameWithoutExtension(mainAssetRelPath);
                     ExportSettings.AddFbxSavePath(System.IO.Path.GetDirectoryName(mainAssetRelPath));
+
+                    fbxFileName = m_prefabFileName;
+                }
+
+                var fullPrefabPath = System.IO.Path.Combine(ExportSettings.PrefabAbsoluteSavePath, m_prefabFileName + ".prefab");
+                if (System.IO.File.Exists(fullPrefabPath))
+                {
+                    m_prefabFileName = System.IO.Path.GetFileNameWithoutExtension(ConvertToNestedPrefab.IncrementFileName(ExportSettings.PrefabAbsoluteSavePath, m_prefabFileName + ".prefab"));
                 }
 
                 // if only one object selected, set transfer source/dest to this object
@@ -80,7 +89,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 m_prefabFileName = "(automatic)";
             }
 
-            this.SetFilename(m_prefabFileName);
+            // if there is an existing fbx file then use its name, otherwise use the same name as for the prefab
+            this.SetFilename(fbxFileName != null? fbxFileName : m_prefabFileName);
         }
 
         protected override void OnEnable()
@@ -91,6 +101,21 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 InnerEditor = UnityEditor.Editor.CreateEditor(ExportSettings.instance.ConvertToPrefabSettings);
             }
             m_prefabExtLabelWidth = FbxExtLabelStyle.CalcSize(new GUIContent(".prefab")).x;
+        }
+
+        /// <summary>
+        /// Return the number of objects in the selection that contain RectTransforms.
+        /// </summary>
+        protected int GetUIElementsInExportSetCount()
+        {
+            int count = 0;
+            foreach (var obj in GetToExport())
+            {
+                var go = ModelExporter.GetGameObject(obj);
+                var rectTransforms = go.GetComponentsInChildren<RectTransform>();
+                count += rectTransforms.Length;
+            }
+            return count;
         }
 
         protected bool ExportSetContainsAnimation()
@@ -133,6 +158,21 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 return false;
             }
 
+            int rectTransformCount = GetUIElementsInExportSetCount();
+            if (rectTransformCount > 0)
+            {
+                // Warn that UI elements will break if converted
+                string warning = string.Format("Warning: UI Components (ie, RectTransform) are not saved when converting to FBX.\n{0} item(s) in the selection will lose their UI components.",
+                    rectTransformCount);
+                bool result = UnityEditor.EditorUtility.DisplayDialog(
+                    string.Format("{0} Warning", ModelExporter.PACKAGE_UI_NAME), warning, "Convert and Lose UI", "Cancel");
+
+                if (!result)
+                {
+                    return false;
+                }
+            }
+
             if (SettingsObject.UseMayaCompatibleNames && SettingsObject.AllowSceneModification)
             {
                 string warning = "Names of objects in the hierarchy may change with the Compatible Naming option turned on";
@@ -162,14 +202,12 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
                 // Check if we'll be clobbering files. If so, warn the user
                 // first and let them cancel out.
-                if (ConvertToModel.WillCreatePrefab(go))
+                if (!OverwriteExistingFile(prefabPath))
                 {
-                    if (!OverwriteExistingFile(prefabPath))
-                    {
-                        return false;
-                    }
+                    return false;
                 }
-                if (ConvertToModel.WillExportFbx(go))
+
+                if (ConvertToNestedPrefab.WillExportFbx(go))
                 {
                     if (!OverwriteExistingFile(fbxPath))
                     {
@@ -177,19 +215,33 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     }
                 }
 
-                ConvertToModel.Convert(
+                ConvertToNestedPrefab.Convert(
                     go, fbxFullPath: fbxPath, prefabFullPath: prefabPath, exportOptions: ExportSettings.instance.ConvertToPrefabSettings.info
                 );
                 return true;
             }
 
+            bool onlyPrefabAssets = ConvertToNestedPrefab.SetContainsOnlyPrefabAssets(GetToExport());
+            int groupIndex = -1;
+            // no need to undo if we aren't converting anything that's in the scene
+            if (!onlyPrefabAssets)
+            {
+                Undo.IncrementCurrentGroup();
+                groupIndex = Undo.GetCurrentGroup();
+                Undo.SetCurrentGroupName(ConvertToNestedPrefab.UndoConversionCreateObject);
+            }
             foreach (var obj in GetToExport())
             {
                 // Convert, automatically choosing a file path that won't clobber any existing files.
                 var go = ModelExporter.GetGameObject(obj);
-                ConvertToModel.Convert(
+                ConvertToNestedPrefab.Convert(
                     go, fbxDirectoryFullPath: fbxDirPath, prefabDirectoryFullPath: prefabDirPath, exportOptions: ExportSettings.instance.ConvertToPrefabSettings.info
                 );
+            }
+            if (!onlyPrefabAssets && groupIndex >= 0)
+            {
+                Undo.CollapseUndoOperations(groupIndex);
+                Undo.IncrementCurrentGroup();
             }
             return true;
         }
@@ -280,4 +332,3 @@ namespace UnityEditor.Formats.Fbx.Exporter
         }
     }
 }
-#endif // !UNITY_2018_3_OR_NEWER
