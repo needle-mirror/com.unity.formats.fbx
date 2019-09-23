@@ -1,7 +1,7 @@
 {
   "name": "com.unity.formats.fbx",
   "displayName": "FBX Exporter",
-  "version": "2.0.2-preview.1",
+  "version": "2.0.3-preview.3",
   "dependencies": {
     "com.unity.timeline": "1.0.0",
     "com.autodesk.fbx": "2.0.1-preview.1"
@@ -17,11 +17,11 @@
     "max"
   ],
   "relatedPackages": {
-    "com.unity.formats.fbx.tests": "2.0.2-preview.1"
+    "com.unity.formats.fbx.tests": "2.0.3-preview.3"
   },
   "repository": {
     "type": "git",
-    "url": "git@github.com:Unity-Technologies/FbxExporters.git",
-    "revision": "01667dfd2449cb37c595ab528e184acb6d3ce2cf"
+    "url": "git@github.com:Unity-Technologies/com.unity.formats.fbx.git",
+    "revision": "e40e64293b082ce530faa207f262c250be054ff9"
   }
 }
