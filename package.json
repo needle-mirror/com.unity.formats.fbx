@@ -1,9 +1,9 @@
 {
   "name": "com.unity.formats.fbx",
   "displayName": "FBX Exporter",
-  "version": "3.1.0-preview.1",
+  "version": "3.2.0-preview.2",
   "dependencies": {
-    "com.unity.recorder": "2.1.0-preview.1",
+    "com.unity.recorder": "2.2.0-preview.4",
     "com.unity.timeline": "1.0.0",
     "com.autodesk.fbx": "3.0.1-preview.1"
   },
@@ -18,12 +18,14 @@
     "max"
   ],
   "relatedPackages": {
-    "com.unity.formats.fbx.tests": "3.1.0-preview.1"
+    "com.unity.formats.fbx.tests": "3.2.0-preview.2"
+  },
+  "upmCi": {
+    "footprint": "3d983cad9d4bb7d9a7df240f18990b71d98abda9"
   },
   "repository": {
-    "footprint": "977228013ab996048a83997567a32b29e51348d9",
     "type": "git",
     "url": "https://github.com/Unity-Technologies/com.unity.formats.fbx.git",
-    "revision": "8fe16c7d5a6462b1c0ead43f662e45dbecd591e3"
+    "revision": "f37806913dc567ec7a230a8d75d36c1b9ddda3fc"
   }
 }
