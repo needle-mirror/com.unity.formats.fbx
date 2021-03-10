@@ -1,10 +1,10 @@
 {
   "name": "com.unity.formats.fbx",
   "displayName": "FBX Exporter",
-  "version": "4.0.0-pre.4",
+  "version": "4.0.1",
   "dependencies": {
     "com.unity.timeline": "1.0.0",
-    "com.autodesk.fbx": "4.0.0-pre.2"
+    "com.autodesk.fbx": "4.0.1"
   },
   "unity": "2019.4",
   "unityRelease": "0f1",
@@ -17,14 +17,14 @@
     "max"
   ],
   "relatedPackages": {
-    "com.unity.formats.fbx.tests": "4.0.0-pre.4"
+    "com.unity.formats.fbx.tests": "4.0.1"
   },
   "upmCi": {
-    "footprint": "f0095bbb8f99bbcd4e87687ac52555454cf2ca9d"
+    "footprint": "c748d6809e94895e8ed8efeea266952b54e12b08"
   },
   "repository": {
     "url": "https://github.com/Unity-Technologies/com.unity.formats.fbx.git",
     "type": "git",
-    "revision": "1741a47bfc2362ab93062ec421429f20b5c43e62"
+    "revision": "453f9888c14cc98664b7c296cf297f2956ca573e"
   }
 }
