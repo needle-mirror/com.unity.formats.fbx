@@ -2,7 +2,9 @@ using System.IO;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Animations;
+using UnityEngine.Timeline;
 using UnityEditor;
+using UnityEditor.Timeline;
 using System.Linq;
 using Autodesk.Fbx;
 using System.Runtime.CompilerServices;  
@@ -63,7 +65,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
     /// Use the ExportObject and ExportObjects methods. The default export
     /// options are used when exporting the objects to the FBX file.
     /// </para>
-    /// <para>For information on using the ModelExporter class, see <a href="../manual/devguide.html">the Developer's Guide</a>.</para>
+    /// <para>For information on using the ModelExporter class, see <a href="../manual/api_index.html">the Developer's Guide</a>.</para>
     /// </summary>
     public sealed class ModelExporter : System.IDisposable
     {
@@ -163,6 +165,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// and its FbxConstraints for quick lookup when exporting constraint animations.
         /// </summary>
         Dictionary<FbxNode, Dictionary<FbxConstraint, System.Type>> MapConstrainedObjectToConstraints = new Dictionary<FbxNode, Dictionary<FbxConstraint, System.Type>>();
+
+        /// <summary>
+        /// keep a map between the FbxNode and its blendshape channels for quick lookup when exporting blendshapes.
+        /// </summary>
+        Dictionary<FbxNode, List<FbxBlendShapeChannel>> MapUnityObjectToBlendShapes = new Dictionary<FbxNode, List<FbxBlendShapeChannel>>();
 
         /// <summary>
         /// Map Unity material ID to FBX material object
@@ -483,11 +490,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// <summary>
         /// Export the mesh's blend shapes.
         /// </summary>
-        private bool ExportBlendShapes(MeshInfo mesh, FbxMesh fbxMesh, FbxScene fbxScene, int[] unmergedTriangles)
+        private FbxBlendShape ExportBlendShapes(MeshInfo mesh, FbxMesh fbxMesh, FbxScene fbxScene, int[] unmergedTriangles)
         {
             var umesh = mesh.mesh;
             if (umesh.blendShapeCount == 0)
-                return false;
+                return null;
 
             var fbxBlendShape = FbxBlendShape.Create(fbxScene, umesh.name + "_BlendShape");
             fbxMesh.AddDeformer(fbxBlendShape);
@@ -564,7 +571,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     }
                 }
             }
-            return true;
+            return fbxBlendShape;
         }
 
         /// <summary>
@@ -899,7 +906,24 @@ namespace UnityEditor.Formats.Fbx.Exporter
             ExportComponentAttributes (meshInfo, fbxMesh, unmergedPolygons.ToArray());
 
             // Set up blend shapes.
-            ExportBlendShapes(meshInfo, fbxMesh, fbxScene, unmergedPolygons.ToArray());
+            FbxBlendShape fbxBlendShape = ExportBlendShapes(meshInfo, fbxMesh, fbxScene, unmergedPolygons.ToArray());
+            
+            if(fbxBlendShape != null && fbxBlendShape.GetBlendShapeChannelCount() > 0)
+            {
+                // Populate mapping for faster lookup when exporting blendshape animations
+                List<FbxBlendShapeChannel> blendshapeChannels;
+                if (!MapUnityObjectToBlendShapes.TryGetValue(fbxNode, out blendshapeChannels))
+                {
+                    blendshapeChannels = new List<FbxBlendShapeChannel>();
+                    MapUnityObjectToBlendShapes.Add(fbxNode, blendshapeChannels);
+                }
+                
+                for(int i = 0; i < fbxBlendShape.GetBlendShapeChannelCount(); i++)
+                {
+                    var bsChannel = fbxBlendShape.GetBlendShapeChannel(i);
+                    blendshapeChannels.Add(bsChannel);
+                }
+            }
 
             // set the fbxNode containing the mesh
             fbxNode.SetNodeAttribute (fbxMesh);
@@ -1946,25 +1970,45 @@ namespace UnityEditor.Formats.Fbx.Exporter
             }
 
             Dictionary<FbxConstraint, System.Type> constraints;
-            if (!MapConstrainedObjectToConstraints.TryGetValue(constrainedNode, out constraints))
+            if (MapConstrainedObjectToConstraints.TryGetValue(constrainedNode, out constraints))
             {
-                return null;
-            }
-                
-            foreach (var constraint in constraints)
-            {
-                if (uniConstraintType != constraint.Value)
+                var targetConstraint = constraints.FirstOrDefault(constraint => (constraint.Value == uniConstraintType));
+                if (!targetConstraint.Equals(default(KeyValuePair<FbxConstraint, System.Type>)))
                 {
-                    continue;
+                    return targetConstraint.Key;
                 }
-
-                return constraint.Key;
             }
 
             return null;
         }
 
-        private FbxProperty GetFbxProperty(FbxNode fbxNode, string fbxPropertyName, System.Type uniPropertyType)
+        /// <summary>
+        /// Get the FbxBlendshape with the given name associated with the FbxNode.
+        /// </summary>
+        /// <param name="blendshapeNode"></param>
+        /// <param name="uniPropertyName"></param>
+        /// <returns></returns>
+        private FbxBlendShapeChannel GetFbxBlendShape(FbxNode blendshapeNode, string uniPropertyName)
+        {
+            List<FbxBlendShapeChannel> blendshapeChannels;
+            if (MapUnityObjectToBlendShapes.TryGetValue(blendshapeNode, out blendshapeChannels))
+            {
+                var match = System.Text.RegularExpressions.Regex.Match(uniPropertyName, @"blendShape\.(\S+)");
+                if (match.Success && match.Groups.Count > 0)
+                {
+                    string blendshapeName = match.Groups[1].Value;
+
+                    var targetChannel = blendshapeChannels.FirstOrDefault(channel => (channel.GetName() == blendshapeName));
+                    if (targetChannel != null)
+                    {
+                        return targetChannel;
+                    }    
+                }
+            }
+            return null;
+        }
+
+        private FbxProperty GetFbxProperty(FbxNode fbxNode, string fbxPropertyName, System.Type uniPropertyType, string uniPropertyName)
         {
             if(fbxNode == null)
             {
@@ -1978,6 +2022,17 @@ namespace UnityEditor.Formats.Fbx.Exporter
             if(fbxConstraint != null)
             {
                 var prop = fbxConstraint.FindProperty(fbxPropertyName, false);
+                if (prop.IsValid())
+                {
+                    return prop;
+                }
+            }
+
+            // check if the property maps to a blendshape
+            var fbxBlendShape = GetFbxBlendShape(fbxNode, uniPropertyName);
+            if (fbxBlendShape != null)
+            {
+                var prop = fbxBlendShape.FindProperty(fbxPropertyName, false);
                 if (prop.IsValid())
                 {
                     return prop;
@@ -2030,8 +2085,9 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
             foreach (var fbxPropertyChannelPair in fbxPropertyChannelPairs) {
                 // map unity property name to fbx property
-                var fbxProperty = GetFbxProperty(fbxNode, fbxPropertyChannelPair.Property, uniPropertyType);
-                if (!fbxProperty.IsValid ()) {
+                var fbxProperty = GetFbxProperty(fbxNode, fbxPropertyChannelPair.Property, uniPropertyType, uniPropertyName);
+                if (!fbxProperty.IsValid ()) 
+                {
                     Debug.LogError (string.Format ("no fbx property {0} found on {1} node or nodeAttribute ", fbxPropertyChannelPair.Property, fbxNode.GetName ()));
                     return;
                 }
@@ -2823,6 +2879,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
                         ExportLight (go, fbxScene, node);
                     } else if (compType == typeof(Camera)) {
                         ExportCamera (go, fbxScene, node);
+                    } else if (compType == typeof(SkinnedMeshRenderer)) {
+                        // export only what is necessary for exporting blendshape animation
+                        var unitySkin = go.GetComponent<SkinnedMeshRenderer>();
+                        var meshInfo = new MeshInfo(unitySkin.sharedMesh, unitySkin.sharedMaterials);
+                        ExportMesh(meshInfo, node);
                     }
                 }
             }
@@ -3082,7 +3143,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
         /// components and the animation clips. Also, the first animation to export, if any.
         /// </summary>
         /// <returns>The animation only hierarchy count.</returns>
-        /// <param name="exportSet">GameObject hierarchies selected for export.</param>
         /// <param name="hierarchyToExportData">Map from GameObject hierarchy to animation export data.</param>
         [SecurityPermission(SecurityAction.LinkDemand)]
         internal int GetAnimOnlyHierarchyCount(Dictionary<GameObject, IExportData> hierarchyToExportData)
@@ -3090,6 +3150,10 @@ namespace UnityEditor.Formats.Fbx.Exporter
             // including any parents of animated objects that are exported
             var completeExpSet = new HashSet<GameObject>();
             foreach (var data in hierarchyToExportData.Values) {
+                if(data == null || data.Objects == null || data.Objects.Count <= 0)
+                {
+                    continue;
+                }
                 foreach (var go in data.Objects) {
                     completeExpSet.Add(go);
 
@@ -3841,14 +3905,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
         [MenuItem(TimelineClipMenuItemName, true, 31)]
         static bool ValidateOnClipContextClick()
         {
-            Object[] selectedObjects = Selection.objects;
-
-            foreach (Object editorClipSelected in selectedObjects)
+            TimelineClip[] selectedClips = TimelineEditor.selectedClips;
+            
+            if(selectedClips != null && selectedClips.Length > 0)
             {
-                if (IsEditorClip(editorClipSelected))
-                {         
-                    return true;
-                }
+                return true;
             }
             return false;
         }
@@ -4115,9 +4176,18 @@ namespace UnityEditor.Formats.Fbx.Exporter
             if (obj is UnityEngine.Transform) {
                 var xform = obj as UnityEngine.Transform;
                 return xform.gameObject;
-            } else if (obj is UnityEngine.GameObject) {
+            }
+            else if (obj is UnityEngine.SkinnedMeshRenderer)
+            {
+                var skinnedMeshRenderer = obj as UnityEngine.SkinnedMeshRenderer;
+                return skinnedMeshRenderer.gameObject;
+            }
+            else if (obj is UnityEngine.GameObject)
+            {
                 return obj as UnityEngine.GameObject;
-            } else if (obj is Behaviour) {
+            } 
+            else if (obj is Behaviour) 
+            {
                 var behaviour = obj as Behaviour;
                 return behaviour.gameObject;
             }

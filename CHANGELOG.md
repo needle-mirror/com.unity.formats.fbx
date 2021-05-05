@@ -1,5 +1,18 @@
 # Changes in Fbx Exporter
 
+## [4.1.0-pre.2] - 2021-05-05
+### Known Issues
+- FBX exporter integration with Probuilder broken with Probuilder 5.0.3. Exporting a Probuilder object may break the original object.
+
+## [4.1.0-pre.1] - 2021-04-29
+### Added
+- Added ability to export blendshape animations when the "Animated Skinned Mesh" Export Option is selected.
+
+### Changed
+- Updating the minimum required version of the Unity Recorder package to 2.5.5.
+- Updating the minimum required version of the Timeline package to 1.5.2.
+- Updated the FBX SDK bindings to 4.1.0-pre.1.
+
 ## [4.0.1] - 2021-03-10
 ### Changed
 - Update from prerelease to released package.
