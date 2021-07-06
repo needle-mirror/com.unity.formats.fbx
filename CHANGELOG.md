@@ -1,5 +1,33 @@
 # Changes in Fbx Exporter
 
+## [4.1.0] - 2021-07-06
+### Changed
+- Update from prerelease to released package.
+- Updated the FBX SDK bindings to 4.1.0.
+
+## [4.1.0-pre.3] - 2021-06-28
+### Changed
+- Updated the FBX SDK bindings to 4.1.0-pre.3.
+
+### Fixed
+- Fix Fbx Export Project Settings break if they are open when changing scenes.
+- Fix specular texture not being exported.
+- Fix NullReferenceException if materials are null.
+- Fix NullReferenceException if animation is missing.
+- Fix error when exporting object with empty name.
+- Fix misaligned text in export file name field.
+- Fix warning about missing metafiles.
+- Fix warning about using absolute paths when overwriting an fbx file.
+- Fix exporting zero scale not importing correctly in 3ds Max.
+- Fix window size cutting off text in export window.
+- Fix object name not being undone after undo convert to prefab.
+- Fix settings reset button not working.
+- Fix not being able to export to a new folder on Mac.
+- Fix hdrp materials being exported with max incandescence.
+- Fix warning about ExportSettings not being in a file called ExportSettings.cs.
+- Fix exception when exporting a missing or null mesh.
+- Fix incorrect skinning if character bone hierarchy contains objects that do not have a bindpose.
+
 ## [4.1.0-pre.2] - 2021-05-05
 ### Known Issues
 - FBX exporter integration with Probuilder broken with Probuilder 5.0.3. Exporting a Probuilder object may break the original object.
