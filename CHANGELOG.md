@@ -1,5 +1,11 @@
 # Changes in Fbx Exporter
 
+## [4.2.0-pre.1] - 2022-04-20
+### Changed
+- Added export options to Keep Instances and Embed Textures. Thank you to @hybridherbst for the additions.
+- Updated to the default file version, which allows exporting large binary FBX files. Make sure to update to Blender 2.79 or later to read these files.
+- Moved Timeline Clip export menu from "GameObject > Export Selected Timeline Clip..." to Timeline Clip context menu.
+
 ## [4.1.2] - 2021-09-19
 ### Changed
 - Added the ability to export meshes using more than 4 skin weights per vertex.
