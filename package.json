@@ -1,10 +1,10 @@
 {
   "name": "com.unity.formats.fbx",
   "displayName": "FBX Exporter",
-  "version": "4.2.0-pre.1",
+  "version": "4.2.0",
   "dependencies": {
     "com.unity.timeline": "1.7.1",
-    "com.autodesk.fbx": "4.2.0-pre.1"
+    "com.autodesk.fbx": "4.2.0"
   },
   "unity": "2019.4",
   "unityRelease": "0f1",
@@ -16,18 +16,15 @@
     "maya",
     "max"
   ],
-  "upm": {
-    "changelog": "### Changed\n- Added export options to Keep Instances and Embed Textures. Thank you to @hybridherbst for the additions.\n- Updated to the default file version, which allows exporting large binary FBX files. Make sure to update to Blender 2.79 or later to read these files.\n- Moved Timeline Clip export menu from \"GameObject > Export Selected Timeline Clip...\" to Timeline Clip context menu."
-  },
   "relatedPackages": {
-    "com.unity.formats.fbx.tests": "4.2.0-pre.1"
+    "com.unity.formats.fbx.tests": "4.2.0"
   },
   "upmCi": {
-    "footprint": "6fb59d031d1993510622675c45c2d259d8b418e1"
+    "footprint": "33cdadbc6b34f1a5ba3c76f4b82984168788a8a6"
   },
   "repository": {
     "url": "https://github.com/Unity-Technologies/com.unity.formats.fbx.git",
     "type": "git",
-    "revision": "03467ac102c8af71a15f3b4a8d0d05d1b6ada119"
+    "revision": "1ac7c9cbf3bc838b37b5e527b563b59c74a4c203"
   }
 }
