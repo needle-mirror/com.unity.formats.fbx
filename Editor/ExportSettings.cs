@@ -114,7 +114,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
     internal class ExportSettingsEditor : UnityEditor.Editor
     {
         Vector2 scrollPos = Vector2.zero;
-        const float LabelWidth = 180;
+        const float LabelWidth = 205;
         const float SelectableLabelMinWidth = 90;
         const float BrowseButtonWidth = 25;
         const float FieldOffset = 18;
@@ -148,10 +148,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
             public static GUIContent InstallIntegrationContent = new GUIContent(
                 "Install Unity Integration",
                 "Install and configure the Unity integration for the selected 3D application so that you can import and export directly with this project.");
-            public static GUIContent RepairMissingScripts = new GUIContent(
-                "Run Component Updater",
-                "If FBX exporter version 1.3.0f1 or earlier was previously installed, then links to the FbxPrefab component will need updating.\n" +
-                "Run this to update all FbxPrefab references in text serialized prefabs and scene files.");
             public static GUIContent DisplayOptionsWindow = new GUIContent(
                 "Display Options Window",
                 "Show the Convert dialog when converting to an FBX Prefab Variant");
@@ -298,6 +294,19 @@ namespace UnityEditor.Formats.Fbx.Exporter
 
             EditorGUILayout.LabelField("Export Options", EditorStyles.boldLabel);
             EditorGUI.indentLevel++;
+
+            GUILayout.BeginHorizontal();
+            EditorGUILayout.LabelField(new GUIContent("Verbose logging",
+                "If enabled, logging will be more verbose."), GUILayout.Width(LabelWidth));
+            exportSettings.VerboseProperty = EditorGUILayout.Toggle(exportSettings.VerboseProperty);
+            GUILayout.EndHorizontal();
+
+            GUILayout.BeginHorizontal();
+            EditorGUILayout.LabelField(new GUIContent("Disable Texture Path Warning",
+                "If enabled, disable absolute path warnings"), GUILayout.Width(LabelWidth));
+            exportSettings.DisableAbsolutePathWarningProperty = EditorGUILayout.Toggle(exportSettings.DisableAbsolutePathWarningProperty);
+            GUILayout.EndHorizontal();
+
             EditorGUILayout.BeginHorizontal();
             EditorGUILayout.LabelField(Style.DisplayOptionsWindow, GUILayout.Width(LabelWidth));
             exportSettings.DisplayOptionsWindow = EditorGUILayout.Toggle(
@@ -427,45 +436,6 @@ namespace UnityEditor.Formats.Fbx.Exporter
             EditorGUI.EndDisabledGroup();
 
             EditorGUILayout.Space();
-
-            EditorGUI.indentLevel--;
-            EditorGUILayout.LabelField("FBX Prefab Component Updater", EditorStyles.boldLabel);
-            EditorGUI.indentLevel++;
-
-            EditorGUILayout.Space();
-
-            EditorGUI.BeginDisabledGroup(!isSingletonInstance);
-            if (GUILayout.Button(Style.RepairMissingScripts))
-            {
-                var componentUpdater = new UnityEditor.Formats.Fbx.Exporter.RepairMissingScripts();
-                var filesToRepairCount = componentUpdater.AssetsToRepairCount;
-                var dialogTitle = "FBX Prefab Component Updater";
-                if (filesToRepairCount > 0)
-                {
-                    bool result = UnityEditor.EditorUtility.DisplayDialog(dialogTitle,
-                        string.Format("Found {0} prefab(s) and/or scene(s) with components requiring update.\n\n" +
-                            "If you choose 'Go Ahead', the FbxPrefab components in these assets " +
-                            "will be automatically updated to work with the latest FBX exporter.\n" +
-                            "You should make a backup before proceeding.", filesToRepairCount),
-                        "I Made a Backup. Go Ahead!", "No Thanks");
-                    if (result)
-                    {
-                        componentUpdater.ReplaceGUIDInTextAssets();
-                    }
-                    else
-                    {
-                        var assetsToRepair = componentUpdater.GetAssetsToRepair();
-                        Debug.LogFormat("Failed to update the FbxPrefab components in the following files:\n{0}", string.Join("\n", assetsToRepair));
-                    }
-                }
-                else
-                {
-                    UnityEditor.EditorUtility.DisplayDialog(dialogTitle,
-                        "Couldn't find any prefabs or scenes that require updating", "Ok");
-                }
-            }
-            EditorGUI.EndDisabledGroup();
-            EditorGUI.indentLevel--;
 
             GUILayout.FlexibleSpace();
             GUILayout.EndVertical();
@@ -652,6 +622,14 @@ namespace UnityEditor.Formats.Fbx.Exporter
         {
             get { return Verbose; }
             set { Verbose = value; }
+        }
+
+        [SerializeField]
+        private bool DisableAbsolutePathWarning = false;
+        public bool DisableAbsolutePathWarningProperty
+        {
+            get { return DisableAbsolutePathWarning; }
+            set { DisableAbsolutePathWarning = value; }
         }
 
         private static string DefaultIntegrationSavePath

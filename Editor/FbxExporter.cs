@@ -57,12 +57,12 @@ namespace UnityEditor.Formats.Fbx.Exporter
     }
 
     /// <summary>
-    /// Use the ModelExporter class to export Unity GameObjects to an FBX file.
+    /// <para>Use the ModelExporter class to export Unity GameObjects to an FBX file.</para>
     /// <para>
     /// Use the ExportObject and ExportObjects methods. The default export
     /// options are used when exporting the objects to the FBX file.
     /// </para>
-    /// <para>For information on using the ModelExporter class, see <a href="index.html">the Developer's Guide</a>.</para>
+    /// <para>For API overview and example scripts, refer to @api_index.</para>
     /// </summary>
     public sealed class ModelExporter
     {
@@ -695,6 +695,12 @@ namespace UnityEditor.Formats.Fbx.Exporter
                 fbxTexture.SetWrapMode(GetWrapModeFromUnityWrapMode(wrapModeU, unityMaterial.name, unityPropName),
                     GetWrapModeFromUnityWrapMode(wrapModeV, unityMaterial.name, unityPropName));
                 TextureMap.Add(tuple, fbxTexture);
+                if (!ExportSettings.DisableAbsolutePathWarningProperty)
+                    Debug.LogWarning(
+                        "The source object contains a reference to a texture file. As a consequence, the exported FBX will contain " +
+                        "an absolute reference to this texture file.\nIf you plan to share this FBX asset, make sure your path does " +
+                        "not contain sensitive information.\nYou can disable this warning in the Fbx Export section of your Project Settings." +
+                        $"\nTexture path: {textureSourceFullPath}");
             }
             fbxTexture.ConnectDstProperty(fbxMaterialProperty);
 
@@ -3047,6 +3053,8 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     bool exportedRenderer = false;
                     foreach (var renderer in lod.renderers)
                     {
+                        if (renderer == null)
+                            continue;
                         // only export if parented under LOD group
                         if (renderer.transform.parent == unityGo.transform)
                         {
@@ -4035,6 +4043,11 @@ namespace UnityEditor.Formats.Fbx.Exporter
                     // This needs to be done last so that everything is converted properly.
                     FbxAxisSystem.MayaYUp.DeepConvertScene(fbxScene);
 
+                    // Destroy Url and LastSavedUrl properties before exporting
+                    // This will avoid having useless absolute paths in the DocumentUrl and SrcDocumentUrl fields of the exported file
+                    fbxSceneInfo.Url.Destroy();
+                    fbxSceneInfo.LastSavedUrl.Destroy();
+
                     // Export the scene to the file.
                     status = fbxExporter.Export(fbxScene);
 
@@ -4899,7 +4912,7 @@ namespace UnityEditor.Formats.Fbx.Exporter
         }
 
         /// <summary>
-        /// Exports a list of GameObjects to an FBX file.
+        /// <para>Exports a list of GameObjects to an FBX file.</para>
         /// <para>
         /// Use the SaveFile panel to allow the user to enter a file name.
         /// </para>

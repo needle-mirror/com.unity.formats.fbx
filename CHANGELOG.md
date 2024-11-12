@@ -1,5 +1,18 @@
 # Changes in Fbx Exporter
 
+## [5.1.2] - 2024-11-12
+### Added
+- Added destruction of Url and LastUrl FBXScene properties before export.
+- Added a warning about absolute paths when exporting with Texture file references, with an option in Project Settings to disable this warning.
+- Added an option in Project Settings to activate verbose logging mode.
+
+### Removed
+- Removed the deprecated Component Updater from FBX Export Project Settings.
+
+### Fixed
+- Fixed an exception occurring during hierarchy export when an LOD contains a null renderer.
+- Fixed Presets creation in Unity 2023.1+.
+
 ## [5.1.1] - 2024-03-18
 ### Changed
 - Updated the FBX SDK bindings to 5.1.1.
