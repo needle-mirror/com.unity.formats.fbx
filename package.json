@@ -1,7 +1,7 @@
 {
   "name": "com.unity.formats.fbx",
   "displayName": "FBX Exporter",
-  "version": "5.1.2",
+  "version": "5.1.3",
   "dependencies": {
     "com.unity.timeline": "1.7.1",
     "com.autodesk.fbx": "5.1.1"
@@ -16,18 +16,18 @@
     "max"
   ],
   "relatedPackages": {
-    "com.unity.formats.fbx.tests": "5.1.2"
+    "com.unity.formats.fbx.tests": "5.1.3"
   },
   "_upm": {
-    "changelog": "### Added\n- Added destruction of Url and LastUrl FBXScene properties before export.\n- Added a warning about absolute paths when exporting with Texture file references, with an option in Project Settings to disable this warning.\n- Added an option in Project Settings to activate verbose logging mode.\n\n### Removed\n- Removed the deprecated Component Updater from FBX Export Project Settings.\n\n### Fixed\n- Fixed an exception occurring during hierarchy export when an LOD contains a null renderer.\n- Fixed Presets creation in Unity 2023.1+."
+    "changelog": "### Fixed\n- Fixed an indentation issue in FBX Exporter Project Settings that was preventing straightforward toggling of checkboxes."
   },
   "upmCi": {
-    "footprint": "ba33898d8975c9fc708988283521fdec340ea104"
+    "footprint": "a1671fb7eb75d47a0caf462d6d0d2cf71066f130"
   },
   "documentationUrl": "https://docs.unity3d.com/Packages/com.unity.formats.fbx@5.1/manual/index.html",
   "repository": {
     "url": "https://github.com/Unity-Technologies/com.unity.formats.fbx.git",
     "type": "git",
-    "revision": "05b9cd3489bce242ce82ecb1360770ad01190425"
+    "revision": "1dc43fa4b17f9e2d73204dbdd2463d060ddeb36c"
   }
 }
