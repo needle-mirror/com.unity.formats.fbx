@@ -1,10 +1,10 @@
 {
   "name": "com.unity.formats.fbx",
   "displayName": "FBX Exporter",
-  "version": "5.1.5",
+  "version": "5.1.6",
   "dependencies": {
     "com.unity.timeline": "1.7.1",
-    "com.autodesk.fbx": "5.1.1"
+    "com.autodesk.fbx": "5.1.3"
   },
   "unity": "2020.3",
   "description": "The FBX Exporter package enables round-trip workflows between Unity and 3D modeling software. Send geometry, Lights, Cameras, and animation from Unity to Autodesk® Maya®, Autodesk® Maya LT™, or Autodesk® 3ds Max®, and back to Unity again, with minimal effort.",
@@ -16,18 +16,18 @@
     "max"
   ],
   "relatedPackages": {
-    "com.unity.formats.fbx.tests": "5.1.5"
+    "com.unity.formats.fbx.tests": "5.1.6"
   },
   "_upm": {
-    "changelog": "### Changed\n- Updated the APIs used around EntityId"
+    "changelog": "### Changed\n- Replaced obsolete `EntityId.GetRawData()` with `EntityId.ToULong(EntityId)` (warning CS0618).\n- Replaced obsolete `SearchService.GetItems` with `SearchService.Request`(warning CS0618)."
   },
   "upmCi": {
-    "footprint": "9fce65dfd3fd6bc274515cfa8cd9b1236b43063a"
+    "footprint": "eab33b11df11f2649075e39651bd4981aca4fcc4"
   },
   "documentationUrl": "https://docs.unity3d.com/Packages/com.unity.formats.fbx@5.1/manual/index.html",
   "repository": {
     "url": "https://github.com/Unity-Technologies/com.unity.formats.fbx.git",
     "type": "git",
-    "revision": "e66daf94f83107f6865415b6d5cb964083b986d2"
+    "revision": "b300be3c897a5ade4205b82a270bc9eebb6b2bbd"
   }
 }
